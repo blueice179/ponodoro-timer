@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>番茄钟计时器</title>
+  <style>
+    /* 1.页面样式初始化 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    ul,
+    ol {
+      list-style: none;
+    }
+
+    a {
+      text-decoration: none;
+    }
+
+    input,
+    button {
+      outline: none;
+    }
+
+    /* 2.页面结构布局 */
+    .container {
+      width: 100%;
+      height: 100vh;
+      background-color: rgb(218, 218, 218);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: .1067rem;
+      padding: .16rem;
+
+    }
+
+    .container .study-time-left,
+    .container .total-study-time,
+    .container .rest-time {
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container .total-study-time {
+      grid-row: 1;
+      grid-column: 2;
+    }
+
+    .container .study-time-left {
+      grid-row: 1/3;
+      grid-column: 1;
+    }
+
+    .container .rest-time {
+      grid-row: 2;
+      grid-column: 2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="total-study-time">
+      <h2>总学习时长</h2>
+      <div>00:00:00</div>
+      <div><button>清零</button></div>
+    </div>
+    <div class="study-time-left">
+      <h2>倒计时钟</h2>
+      <svg>时间进度条</svg>
+      <div><input type="text" value='25:00' class="study-time-left-input"></div>
+      <div><button class="study-time-left-start">开始</button>
+        <button class="study-time-left-pause">暂停</button>
+        <button class="study-time-left-reset">重置</button>
+      </div>
+    </div>
+    <div class="rest-time">
+      <h2>休息时间</h2>
+      <div><input type="text">00:00:00</div>
+      <div><button>开始休息</button>
+        <button>暂停休息</button>
+        <button>重置休息</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="./flexible.js"></script>
+  <script>
+    const studyTimeLeftInput = document.querySelector('.study-time-left-input');
+    const studyTimeLeftStart = document.querySelector('.study-time-left-start');
+    const studyTimeLeftPause = document.querySelector('.study-time-left-pause');
+    const studyTimeLeftReset = document.querySelector('.study-time-left-reset');
+
+    // 全局状态：剩余秒数、定时器句柄
+    let totalTime = 1500             // 初始 25 分钟
+    let timeremain = totalTime;
+    let timer = null;
+
+    // 秒 → "mm:ss" 字符串
+    function secToMin(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // 初始化显示
+    studyTimeLeftInput.value = secToMin(timeremain);
+
+    // 开始倒计时
+    function startStudyTimeLeft() {
+      if (timer) return;
+      // 已经归零时，点击开始先恢复到初始值再倒计时
+      if (timeremain <= 0) {
+        timeremain = totalTime;
+        studyTimeLeftInput.value = secToMin(timeremain);
+      }
+      timer = setInterval(() => {
+        timeremain--;
+        studyTimeLeftInput.value = secToMin(timeremain);
+        if (timeremain <= 0) {
+          clearInterval(timer);
+          timer = null;
+        }
+      }, 1000);
+    }
+    // 暂停倒计时
+    function pauseStudyTimeLeft() {
+      clearInterval(timer);
+      timer = null;
+    }
+    // 重置倒计时
+    function resetStudyTimeLeft() {
+      clearInterval(timer);
+      timer = null;
+      timeremain = totalTime;
+      studyTimeLeftInput.value = secToMin(timeremain);
+
+    }
+    // 用户编辑倒计时时间
+    function editTimeLeft() {
+      const minLeft = +prompt('请输入倒计时分钟数')
+      const secLeft = +prompt('请输入倒计时秒数')
+      if (minLeft > 360 || secLeft > 59) {
+        alert('分钟数请不要超过360，秒数请不要超过59')
+        return
+      }
+      Time = minLeft * 60 + secLeft;
+      timeremain = totalTime;
+      studyTimeLeftInput.value = `${minLeft}:${secLeft}`;
+      return;
+    }
+
+
+
+
+    studyTimeLeftStart.addEventListener('click', startStudyTimeLeft);
+    studyTimeLeftPause.addEventListener('click', pauseStudyTimeLeft);
+    studyTimeLeftReset.addEventListener('click', resetStudyTimeLeft);
+    studyTimeLeftInput.addEventListener('focus', editTimeLeft);
+
+  </script>
+</body>
+
+
+</html>
